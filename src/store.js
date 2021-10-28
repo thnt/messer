@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { writable, get } from 'svelte/store';
 
 const _userStore = writable({
+  init: false,
   user: null,
   loading: false,
   error: null,
@@ -10,11 +11,10 @@ export const userStore = {
   subscribe: _userStore.subscribe,
   auth: async () => {
     try {
-      _userStore.update(s => ({ ...s, loading: true }));
       const user = await api.GET('/login');
-      _userStore.update(s => ({ ...s, user }));
+      _userStore.update(s => ({ ...s, user, init: true }));
     } catch (error) {
-      _userStore.update(s => ({ ...s, loading: false }));
+      _userStore.update(s => ({ ...s, loading: false, init: true }));
     }
   },
   login: async (username, password) => {

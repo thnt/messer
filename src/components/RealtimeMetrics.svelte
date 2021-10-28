@@ -9,13 +9,13 @@
   <div class="col-12">
     <slot name="header"><h3>Overview</h3></slot>
   </div>
-  <div class="col-md-4">
-    <MetricBox title="Pressure" dataKey="Pressure" data={$metricStore.recents} />
+  <div class="col-sm-6 col-lg-4">
+    <MetricBox title="Temperature" unit="°C" dataKey="Temperature" data={$metricStore.recents} />
   </div>
-  <div class="col-md-4">
-    <MetricBox title="Temperature" dataKey="Temperature" data={$metricStore.recents} />
+  <div class="col-sm-6 col-lg-4">
+    <MetricBox title="Pressure" unit="Barg" dataKey="Pressure" data={$metricStore.recents} />
   </div>
-  <div class="col-md-4">
-    <MetricBox title="Massflow" dataKey="Massflow" data={$metricStore.recents} />
+  <div class="col-12 col-lg-4">
+    <MetricBox title="Massflow" unit="NCMH" dataKey="Massflow" data={$metricStore.recents} />
   </div>
 </div>

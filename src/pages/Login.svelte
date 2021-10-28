@@ -1,6 +1,7 @@
 <script>
   import { userStore } from '../store';
   import Button from '../components/Button.svelte';
+  import logo from '../assets/logo.png';
 
   let username, password;
 
@@ -11,7 +12,9 @@
 
 <div class="page page-center">
   <div class="container-tight py-4">
-    <h1 class="text-center mb-4">MESSER</h1>
+    <div class="logo p-3 p-sm-4 ps-4 ps-sm-5">
+      <img class="w-100" src={logo} alt="MESSER" />
+    </div>
     <form
       on:submit|preventDefault={onLogin}
       class="card card-md"

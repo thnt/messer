@@ -4,17 +4,17 @@
   import Table from '../components/Table.svelte';
   import Footer from '../components/Footer.svelte';
   import Header from '../components/Header.svelte';
-  import RealtimeMetrics from '../components/RealtimeMetrics.svelte';
+  import Overview from '../components/Overview.svelte';
   import Button from '../components/Button.svelte';
   import { metricStore } from '../store';
 
   const columns = [
     { key: 'Timestamp', name: 'Timestamp', format: v => dayjs.unix(v).format('D/M/YYYY H:mm:ss') },
-    { key: 'Pressure', name: 'Pressure' },
-    { key: 'Temperature', name: 'Temperature' },
-    { key: 'Massflow', name: 'Massflow' },
-    { key: 'TTflowG1000', name: 'TTflowG1000' },
-    { key: 'TTflowL1000', name: 'TTflowL1000' },
+    { key: 'Pressure', name: 'Pressure (Barg)' },
+    { key: 'Temperature', name: 'Temperature (°C)' },
+    { key: 'Massflow', name: 'Flow (NCMH)' },
+    { key: 'TTflowG1000', name: 'High (NCM)' },
+    { key: 'TTflowL1000', name: 'Low (NCM)' },
   ];
 
   const pagesize = 10;
@@ -50,10 +50,9 @@
 </script>
 
 <Header />
-<main class="container pt-4">
-  <RealtimeMetrics>
-    <h3 class="text-white" slot="header">Recently</h3>
-  </RealtimeMetrics>
+<main class="container-lg pt-4">
+  <h1 class="heading text-center mb-3 text-white">PLC AND REMOTE MONITOR SYSTEM</h1>
+  <Overview />
 
   <Table title="Detail" className="mt-4" {columns} {rows} {paging} onChange={getMetricPage}>
     <div slot="filter" class="filter row g-2 mb-3">
@@ -70,3 +69,14 @@
   </Table>
 </main>
 <Footer />
+
+<style>
+  .heading {
+    font-size: calc(0.9rem + 0.6vw);
+  }
+  @media (min-width: 1400px) {
+    .heading {
+      font-size: 1.5rem;
+    }
+  }
+</style>

@@ -13,7 +13,7 @@
 
 {#if $userStore.user?.id}
   <Main />
-{:else if $userStore.loading}
+{:else if !$userStore.init}
   <div class="text-center mt-5">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>

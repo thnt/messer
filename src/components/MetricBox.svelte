@@ -6,6 +6,7 @@
   export let title = 'Metric';
   export let data = [];
   export let dataKey = '';
+  export let unit = '';
 
   let chartNode, chart;
 
@@ -63,7 +64,7 @@
 </script>
 
 <div class="card">
-  <div class="card-body d-flex mt-3 align-items-center">
+  <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
     <h3 class="me-2 title">
       {title}
       {#if data.length}
@@ -75,9 +76,9 @@
         </div>
       {/if}
     </h3>
-    <div class="values ms-auto">
+    <div class="values">
       <div class="max text-danger">MAX: <span>{max || '-'}</span></div>
-      <div class="value">{data?.[0]?.[dataKey] || 0}</div>
+      <div class="value">{data?.[0]?.[dataKey] || 0} {unit}</div>
       <div class="min text-green">MIN: <span>{min || '-'}</span></div>
     </div>
   </div>
@@ -90,7 +91,7 @@
   }
   .value {
     font-weight: 600;
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   .timestamp {
     font-weight: normal;
