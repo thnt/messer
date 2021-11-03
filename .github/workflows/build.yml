@@ -26,10 +26,11 @@ jobs:
         yarn
         yarn build
         go mod tidy
-        CGO_ENABLED=0 go build
+        env GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o messer-x86_64
+        env GOOS=linux GOARCH=arm GOARM=7 CGO_ENABLED=0 go build -o messer-arm
       
     - name: Archive artifacts
       uses: actions/upload-artifact@v2
       with:
         name: messer
-        path: messer
+        path: messer-*
