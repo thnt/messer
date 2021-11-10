@@ -54,7 +54,7 @@
             {#each rows as row, i (rowId ? row[rowId] : i)}
               <tr>
                 {#each columns as c}
-                  <td>{c.format ? c.format(row[c.key]) : row[c.key]}</td>
+                  <td>{c.format ? c.format(row[c.key]) : row[c.key] || '-'}</td>
                 {/each}
               </tr>
             {/each}

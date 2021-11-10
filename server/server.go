@@ -327,6 +327,7 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 		Massflow    *float64
 		TTflowG1000 *float64
 		TTflowL1000 *float64
+		TotalFlow   *float64
 		Timestamp   int64
 	}{}
 
@@ -351,7 +352,8 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 			MAX(CASE WHEN name = 'Temperature' THEN value END) Temperature,
 			MAX(CASE WHEN name = 'Massflow' THEN value END) Massflow,
 			MAX(CASE WHEN name = 'TTflowG1000' THEN value END) TTflowG1000,
-			MAX(CASE WHEN name = 'TTflowL1000' THEN value END) TTflowL1000
+			MAX(CASE WHEN name = 'TTflowL1000' THEN value END) TTflowL1000,
+			MAX(CASE WHEN name = 'TotalFlow' THEN value END) TotalFlow
 		FROM (
 			SELECT MAX(id) id FROM metrics GROUP BY name, timestamp
 		) t LEFT JOIN metrics ON t.id = metrics.id
