@@ -10,28 +10,27 @@
 
 <div class="card">
   <div class="card-body">
-    <div class="d-flex text-center border-bottom pb-3">
-      <div class="w-50 border-end">
+    <div class="row text-center border-bottom pb-3">
+      <div class="col">
         <div class="title">NORMAL</div>
         <div class="small">(NCM)</div>
         <div class="value mt-1">{currentValues.TTflowL1000 ?? '-'}</div>
       </div>
-      <div class="w-50">
+      <div class="col border-start border-end">
         <div class="title">OVER MAX</div>
         <div class="small">(NCM)</div>
         <div class="value mt-1">{currentValues.TTflowG1000 ?? '-'}</div>
+      </div>
+      <div class="col">
+        <div class="title">TOTAL FOLOW</div>
+        <div class="small">(NCM)</div>
+        <div class="value mt-1">{currentValues.TotalFlow ?? '-'}</div>
       </div>
     </div>
     <div class="text-center device mt-3">
       <img class="h-100" src={device} alt="" />
     </div>
     <ul class="list-group mb-4 mx-auto">
-      <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center">
-        <div class="title me-3">Total flow:</div>
-        <div class="value">
-          {currentValues.TotalFlow ?? '-'} <span class="unit">NCM</span>
-        </div>
-      </li>
       <li class="list-group-item d-flex flex-wrap justify-content-between align-items-center">
         <div class="title me-3">Current flow:</div>
         <div class="value">
