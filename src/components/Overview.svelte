@@ -22,7 +22,7 @@
         <div class="value mt-1">{currentValues.TTflowG1000 ?? '-'}</div>
       </div>
       <div class="col">
-        <div class="title">TOTAL FOLOW</div>
+        <div class="title">TOTAL FLOW</div>
         <div class="small">(NCM)</div>
         <div class="value mt-1">{currentValues.TotalFlow ?? '-'}</div>
       </div>

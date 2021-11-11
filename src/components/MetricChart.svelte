@@ -16,7 +16,7 @@
   const colors = ['#206bc4', '#2fb344', '#ae3ec9', '#f76707', '#d63939', '#0ca678'];
 
   let selectedMetrics = {
-    TotalFlow: true,
+    Massflow: true,
   };
 
   $: {
