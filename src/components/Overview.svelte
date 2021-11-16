@@ -14,17 +14,17 @@
       <div class="col">
         <div class="title">NORMAL</div>
         <div class="small">(NCM)</div>
-        <div class="value mt-1">{currentValues.TTflowL1000 ?? '-'}</div>
+        <div class="value mt-2">{currentValues.TTflowL1000 ?? '-'}</div>
       </div>
       <div class="col border-start border-end">
         <div class="title">OVER MAX</div>
         <div class="small">(NCM)</div>
-        <div class="value mt-1">{currentValues.TTflowG1000 ?? '-'}</div>
+        <div class="value mt-2">{currentValues.TTflowG1000 ?? '-'}</div>
       </div>
       <div class="col">
         <div class="title">TOTAL FLOW</div>
         <div class="small">(NCM)</div>
-        <div class="value mt-1">{currentValues.TotalFlow ?? '-'}</div>
+        <div class="value mt-2">{currentValues.TotalFlow ?? '-'}</div>
       </div>
     </div>
     <div class="text-center device mt-3">
@@ -54,9 +54,14 @@
 </div>
 
 <style>
+  .title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .title,
   .value {
     font-weight: 600;
+    white-space: nowrap;
   }
   .value {
     font-size: 1.4rem;
@@ -75,5 +80,13 @@
     font-size: 1rem;
     text-align: right;
     display: inline-block;
+  }
+  @media (max-width: 520px) {
+    .title {
+      font-size: 0.8rem;
+    }
+    .value {
+      font-size: 1rem;
+    }
   }
 </style>
