@@ -6,7 +6,7 @@
 
   let chartNode, chart;
   const metrics = [
-    { key: 'TotalFlow' },
+    //{ key: 'TotalFlow' },
     { key: 'Massflow', label: 'Flow' },
     { key: 'Pressure' },
     // { key: 'TTflowG1000' },

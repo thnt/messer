@@ -16,7 +16,7 @@
     { key: 'Massflow', name: 'Flow (NCMH)' },
     { key: 'TTflowL1000', name: 'Normal (NCM)' },
     { key: 'TTflowG1000', name: 'Over max (NCM)' },
-    { key: 'TotalFlow', name: 'TotalFlow (NCM)' },
+    { key: 'TotalFlow', name: 'Total (NCM)' },
   ];
 
   const pagesize = 15;
@@ -59,16 +59,22 @@
   <Overview />
   <h3 class="mt-4">Recents</h3>
   <MetricChart data={recents} />
-  <Table title="Detail" className="mt-4" {columns} {rows} {paging} onChange={getMetricPage}>
+  <Table title="History Data" className="mt-4" {columns} {rows} {paging} onChange={getMetricPage}>
     <div slot="filter" class="filter row g-2 mb-3">
       <div class="col-sm-6 col-md-4 col-lg-3">
-        <input class="form-control" type="date" bind:value={from} />
+        <div class="input-group">
+          <span class="input-group-text w-25">From:</span>
+          <input class="form-control" type="date" bind:value={from} />
+        </div>
       </div>
       <div class="col-sm-6 col-md-4 col-lg-3">
-        <input class="form-control" type="date" bind:value={to} />
+        <div class="input-group">
+          <span class="input-group-text w-25">To:</span>
+          <input class="form-control" type="date" bind:value={to} />
+        </div>
       </div>
       <div class="col-sm-6 col-md-4 col-lg-3">
-        <Button on:click={() => getMetricPage(1)}>OK</Button>
+        <Button on:click={() => getMetricPage(1)}>SEARCH</Button>
       </div>
     </div>
   </Table>
