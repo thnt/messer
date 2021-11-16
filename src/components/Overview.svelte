@@ -81,7 +81,7 @@
     text-align: right;
     display: inline-block;
   }
-  @media (max-width: 520px) {
+  @media (max-width: 480px) {
     .title {
       font-size: 0.8rem;
     }
