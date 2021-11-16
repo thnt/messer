@@ -6,12 +6,12 @@
 
   let chartNode, chart;
   const metrics = [
-    'TotalFlow',
-    'Massflow',
-    'Pressure',
-    // 'TTflowG1000',
-    // 'TTflowL1000',
-    'Temperature',
+    { key: 'TotalFlow' },
+    { key: 'Massflow', label: 'Flow' },
+    { key: 'Pressure' },
+    // { key: 'TTflowG1000' },
+    // { key: 'TTflowL1000' },
+    { key: 'Temperature' },
   ];
   const colors = ['#206bc4', '#2fb344', '#ae3ec9', '#f76707', '#d63939', '#0ca678'];
 
@@ -23,10 +23,10 @@
     if (chart) {
       chart.updateSeries(
         metrics
-          .filter(m => selectedMetrics[m])
+          .filter(m => selectedMetrics[m.key])
           .map(m => ({
-            name: m,
-            data: data.map(d => [d.Timestamp * 1000, d[m]]).reverse(),
+            name: m.label || m.key,
+            data: data.map(d => [d.Timestamp * 1000, d[m.key]]).reverse(),
           })),
       );
     }
@@ -55,10 +55,10 @@
         },
       },
       series: metrics
-        .filter(m => selectedMetrics[m])
+        .filter(m => selectedMetrics[m.key])
         .map(m => ({
-          name: m,
-          data: data.map(d => [d.Timestamp * 1000, d[m]]).reverse(),
+          name: m.label || m.key,
+          data: data.map(d => [d.Timestamp * 1000, d[m.key]]).reverse(),
         })),
     };
 
@@ -79,10 +79,10 @@
             type="checkbox"
             checked={!!selectedMetrics[m]}
             on:click={e => {
-              selectedMetrics = { ...selectedMetrics, [m]: e.target.checked };
+              selectedMetrics = { ...selectedMetrics, [m.key]: e.target.checked };
             }}
           />
-          <span class="form-check-label">{m}</span>
+          <span class="form-check-label">{m.label || m.key}</span>
         </label>
       {/each}
     </div>
