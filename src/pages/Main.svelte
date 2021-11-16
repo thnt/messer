@@ -13,10 +13,10 @@
     { key: 'Timestamp', name: 'Timestamp', format: v => dayjs.unix(v).format('D/M/YYYY H:mm:ss') },
     { key: 'Pressure', name: 'Pressure (Barg)' },
     { key: 'Temperature', name: 'Temperature (°C)' },
-    { key: 'TotalFlow', name: 'TotalFlow (NCM)' },
     { key: 'Massflow', name: 'Flow (NCMH)' },
-    { key: 'TTflowG1000', name: 'High (NCM)' },
-    { key: 'TTflowL1000', name: 'Low (NCM)' },
+    { key: 'TTflowL1000', name: 'Normal (NCM)' },
+    { key: 'TTflowG1000', name: 'Over max (NCM)' },
+    { key: 'TotalFlow', name: 'TotalFlow (NCM)' },
   ];
 
   const pagesize = 15;
@@ -55,7 +55,7 @@
 
 <Header />
 <main class="container-lg pt-4">
-  <h1 class="heading text-center mb-3 text-white">PLC AND REMOTE MONITOR SYSTEM</h1>
+  <h1 class="heading text-center mb-3 text-white">TRINA SOLAR REMOTE MONITORING</h1>
   <Overview />
   <h3 class="mt-4">Recents</h3>
   <MetricChart data={recents} />
