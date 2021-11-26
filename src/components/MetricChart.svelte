@@ -6,7 +6,7 @@
 
   let chartNode, chart;
   const metrics = [
-    { key: 'TotalFlow' },
+    // { key: 'TotalFlow' },
     { key: 'Massflow', label: 'Flow' },
     { key: 'Pressure' },
     // { key: 'TTflowG1000' },
@@ -77,7 +77,7 @@
           <input
             class="form-check-input"
             type="checkbox"
-            checked={!!selectedMetrics[m]}
+            checked={!!selectedMetrics[m.key]}
             on:click={e => {
               selectedMetrics = { ...selectedMetrics, [m.key]: e.target.checked };
             }}

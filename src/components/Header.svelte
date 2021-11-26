@@ -12,7 +12,7 @@
 
 <header class="navbar navbar-expand-md navbar-dark navbar-overlap d-print-none p-0">
   <div class="container-xl">
-    <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal p-0">
+    <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal p-0 pt-2">
       <img class="logo" src={logo} alt="MESSER">
     </h1>
     <div class="order-md-last">

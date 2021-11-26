@@ -322,13 +322,14 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 	}
 
 	results := []struct {
-		Pressure    *float64
-		Temperature *float64
-		Massflow    *float64
-		TTflowG1000 *float64
-		TTflowL1000 *float64
-		TotalFlow   *float64
-		Timestamp   int64
+		Pressure       *float64
+		Temperature    *float64
+		Massflow       *float64
+		TTflowG1000    *float64
+		TTflowL1000    *float64
+		TotalFlow      *float64
+		DeviceErrorPLC *int
+		Timestamp      int64
 	}{}
 
 	var ch chan bool
@@ -353,7 +354,8 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 			MAX(CASE WHEN name = 'Massflow' THEN value END) Massflow,
 			MAX(CASE WHEN name = 'TTflowG1000' THEN value END) TTflowG1000,
 			MAX(CASE WHEN name = 'TTflowL1000' THEN value END) TTflowL1000,
-			MAX(CASE WHEN name = 'TotalFlow' THEN value END) TotalFlow
+			MAX(CASE WHEN name = 'TotalFlow' THEN value END) TotalFlow,
+			MAX(CASE WHEN name = '#DEVICE_ERROR_PLC' THEN value END) DeviceErrorPLC
 		FROM (
 			SELECT MAX(id) id FROM metrics GROUP BY name, timestamp
 		) t LEFT JOIN metrics ON t.id = metrics.id

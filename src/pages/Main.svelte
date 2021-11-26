@@ -10,7 +10,11 @@
   import { metricStore } from '../store';
 
   const columns = [
-    { key: 'Timestamp', name: 'Timestamp', format: v => dayjs.unix(v).format('D/M/YYYY H:mm:ss') },
+    {
+      key: 'Timestamp',
+      name: 'Timestamp',
+      format: v => dayjs.unix(v).format('D/M/YYYY H:mm:ss'),
+    },
     { key: 'Pressure', name: 'Pressure (Barg)' },
     { key: 'Temperature', name: 'Temperature (°C)' },
     { key: 'Massflow', name: 'Flow (NCMH)' },
@@ -43,16 +47,48 @@
     size: pagesize,
     current: 1,
   };
+  let latestTs;
+  let deviceErrorCode;
 
   metricStore.subscribe(s => {
     rows = s.metrics;
     paging = { ...paging, total: s.total };
     recents = s.recents;
+    latestTs = recents?.[0]?.Timestamp || rows?.[0]?.Timestamp;
+    deviceErrorCode = recents?.[0]?.DeviceErrorPLC;
   });
 
   getMetricPage(1);
 </script>
 
+{#if (latestTs && dayjs().diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode > 0}
+  <div class="alert alert-danger mb-0 bg-red text-white text-center rounded-0">
+    <!-- Download SVG icon from http://tabler-icons.io/i/alert-circle -->
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      class="icon"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      stroke-width="2"
+      stroke="currentColor"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      ><path stroke="none" d="M0 0h24v24H0z" fill="none" /><circle cx="12" cy="12" r="9" /><line
+        x1="12"
+        y1="8"
+        x2="12"
+        y2="12"
+      /><line x1="12" y1="16" x2="12.01" y2="16" /></svg
+    >
+    <span
+      >{deviceErrorCode > 0
+        ? `Disconnected from PCL device (Error #${deviceErrorCode})`
+        : 'No new data since {dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}'}</span
+    >
+  </div>
+{/if}
 <Header />
 <main class="container-lg pt-4">
   <h1 class="heading text-center mb-3 text-white">TRINA SOLAR REMOTE MONITORING</h1>
