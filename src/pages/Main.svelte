@@ -58,10 +58,16 @@
     deviceErrorCode = recents?.[0]?.DeviceErrorPLC;
   });
 
+  let now = dayjs();
+  setInterval(() => {
+    now = dayjs();
+  }, 1000);
+
+
   getMetricPage(1);
 </script>
 
-{#if (latestTs && dayjs().diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode < 0}
+{#if (latestTs && now.diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode > 0}
   <div class="alert alert-danger mb-0 bg-red text-white text-center rounded-0">
     <!-- Download SVG icon from http://tabler-icons.io/i/alert-circle -->
     <svg
