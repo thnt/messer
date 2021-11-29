@@ -67,7 +67,7 @@
   getMetricPage(1);
 </script>
 
-{#if (latestTs && now.diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode > 0}
+{#if (latestTs && now.diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode < 0}
   <div class="alert alert-danger mb-0 bg-red text-white text-center rounded-0">
     <!-- Download SVG icon from http://tabler-icons.io/i/alert-circle -->
     <svg
@@ -89,9 +89,9 @@
       /><line x1="12" y1="16" x2="12.01" y2="16" /></svg
     >
     <span
-      >{deviceErrorCode > 0
-        ? `Disconnected from PCL device (Error #${deviceErrorCode})`
-        : 'No new data since {dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}'}</span
+      >{deviceErrorCode < 0
+        ? `Disconnected from PCL device`
+        : `No new data since ${dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}`}</span
     >
   </div>
 {/if}
