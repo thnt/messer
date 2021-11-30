@@ -20,7 +20,7 @@
     { key: 'Massflow', name: 'Flow (NCMH)' },
     { key: 'TTflowL1000', name: 'Normal (NCM)' },
     { key: 'TTflowG1000', name: 'Over max (NCM)' },
-    { key: 'TotalFlow', name: 'TotalFlow (NCM)' },
+    { key: 'TotalFlow', name: 'Total (NCM)' },
   ];
 
   const pagesize = 15;
@@ -90,8 +90,8 @@
     >
     <span
       >{deviceErrorCode < 0
-        ? `Disconnected from PCL device`
-        : `No new data since ${dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}`}</span
+        ? `Disconnected from PLC device. Please check PLC device`
+        : `No data received since ${dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}. Please check network and remote PLC`}</span
     >
   </div>
 {/if}
