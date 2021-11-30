@@ -58,10 +58,16 @@
     deviceErrorCode = recents?.[0]?.DeviceErrorPLC;
   });
 
+  let now = dayjs();
+  setInterval(() => {
+    now = dayjs();
+  }, 1000);
+
+
   getMetricPage(1);
 </script>
 
-{#if (latestTs && dayjs().diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode < 0}
+{#if (latestTs && now.diff(dayjs.unix(latestTs), 'm') > 10) || deviceErrorCode < 0}
   <div class="alert alert-danger mb-0 bg-red text-white text-center rounded-0">
     <!-- Download SVG icon from http://tabler-icons.io/i/alert-circle -->
     <svg
@@ -83,9 +89,9 @@
       /><line x1="12" y1="16" x2="12.01" y2="16" /></svg
     >
     <span
-      >{deviceErrorCode > 0
-        ? `Disconnected from PCL device (Error #${deviceErrorCode})`
-        : 'No new data since {dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}'}</span
+      >{deviceErrorCode < 0
+        ? `Disconnected from PCL device`
+        : `No new data since ${dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}`}</span
     >
   </div>
 {/if}
@@ -95,16 +101,22 @@
   <Overview />
   <h3 class="mt-4">Recents</h3>
   <MetricChart data={recents} />
-  <Table title="Detail" className="mt-4" {columns} {rows} {paging} onChange={getMetricPage}>
+  <Table title="History data" className="mt-4" {columns} {rows} {paging} onChange={getMetricPage}>
     <div slot="filter" class="filter row g-2 mb-3">
       <div class="col-sm-6 col-md-4 col-lg-3">
-        <input class="form-control" type="date" bind:value={from} />
+        <div class="input-group">
+          <span class="input-group-text w-25">From:</span>
+          <input class="form-control" type="date" bind:value={from} />
+        </div>
       </div>
       <div class="col-sm-6 col-md-4 col-lg-3">
-        <input class="form-control" type="date" bind:value={to} />
+        <div class="input-group">
+          <span class="input-group-text w-25">To:</span>
+          <input class="form-control" type="date" bind:value={to} />
+        </div>
       </div>
       <div class="col-sm-6 col-md-4 col-lg-3">
-        <Button on:click={() => getMetricPage(1)}>OK</Button>
+        <Button on:click={() => getMetricPage(1)}>SEARCH</Button>
       </div>
     </div>
   </Table>
