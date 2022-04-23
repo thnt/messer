@@ -115,7 +115,7 @@ func (s *server) onMQTTMessage(c mqtt.Client, m mqtt.Message) {
 		ts = d.Unix()
 	}
 	for _, d := range payload.D {
-		if strings.HasSuffix(d.Tag, ":Ts") {
+		if strings.HasSuffix(d.Tag, ":Ts") && ts == 0 {
 			ts = int64(d.Value)
 		}
 	}
