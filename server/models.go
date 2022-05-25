@@ -5,7 +5,7 @@ import "time"
 type Metric struct {
 	ID        uint      `json:"id"`
 	Src       string    `json:"src"`
-	Name      string    `json:"name"`
+	Name      string    `json:"name" gorm:"type:varchar(255)"`
 	Value     float64   `json:"value"`
 	Timestamp int64     `json:"ts" gorm:"index"`
 	CreatedAt time.Time `json:"-"`
