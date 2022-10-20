@@ -304,6 +304,8 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 	if from > 0 {
 		query = query.Where("timestamp >= ?", from)
 		wheres = append(wheres, fmt.Sprintf("timestamp >= %v", from))
+	} else if skip == 0 {
+		wheres = append(wheres, fmt.Sprintf("timestamp >= %v", time.Now().AddDate(0, 0, -30).Unix()))
 	}
 	if to > 0 {
 		query = query.Where("timestamp <= ?", to)
@@ -346,8 +348,10 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 		"total": total,
 	}
 
+	const MAX_METRICS_PER_TIMESTAMP = 20
+
 	for {
-		query = s.db.Raw(fmt.Sprintf(`
+		sql := fmt.Sprintf(`
 		SELECT timestamp,
 			MAX(CASE WHEN name = 'Pressure' THEN value END) Pressure,
 			MAX(CASE WHEN name = 'Temperature' THEN value END) Temperature,
@@ -357,13 +361,13 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 			MAX(CASE WHEN name = 'TotalFlow' THEN value END) TotalFlow,
 			MAX(CASE WHEN name = '#DEVICE_ERROR_PLC' THEN value END) DeviceErrorPLC
 		FROM (
-			SELECT MAX(id) id FROM metrics GROUP BY name, timestamp
+			SELECT MAX(id) id FROM metrics %v GROUP BY name, timestamp ORDER BY id DESC LIMIT %v
 		) t LEFT JOIN metrics ON t.id = metrics.id
-		%v
 		GROUP BY timestamp
 		ORDER BY timestamp DESC
 		LIMIT %v, %v
-	`, where, skip, limit))
+	`, where, (limit+skip)*MAX_METRICS_PER_TIMESTAMP, skip, limit)
+		query = s.db.Raw(sql)
 		if err := query.Scan(&results).Error; err != nil {
 			return nil, fmt.Errorf("query: %w", err)
 		}
