@@ -33,16 +33,16 @@ type session struct {
 	ts  int64
 }
 type server struct {
-	db   *gorm.DB
-	mqtt mqtt.Client
-
-	listening  bool
-	subscribed bool
-	wwwRoot    http.FileSystem
+	db      *gorm.DB
+	mqtt    mqtt.Client
+	wwwRoot http.FileSystem
 
 	sessions     map[string]session
 	mutex        sync.Mutex
 	notiRegistry map[string]chan<- bool
+
+	total       int64
+	totalLastId uint
 }
 
 const datetimeFormat = "2006-01-02T15:04:05Z0700"
@@ -77,6 +77,8 @@ func New(wwwRoot http.FileSystem) (Server, error) {
 		SetPassword(conf.MQTT.Password).
 		SetOnConnectHandler(s.onMQTTConnected)
 	s.mqtt = mqtt.NewClient(opts)
+
+	go s.getTotal()
 
 	return s, nil
 }
@@ -253,6 +255,31 @@ func (s *server) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	staticHandler.ServeHTTP(w, r)
 }
 
+func (s *server) getTotal() (int64, error) {
+	query := s.db.Model(&Metric{})
+	var total int64
+
+	var lastMetric Metric
+	if err := s.db.Order("id desc").First(&lastMetric).Error; err != nil {
+		return 0, fmt.Errorf("get last metric: %v", err)
+	}
+
+	if s.totalLastId > 0 {
+		query = query.Where("id > ?", s.totalLastId)
+	}
+
+	if err := query.Group("timestamp").Count(&total).Error; err != nil {
+		return 0, fmt.Errorf("count: %w", err)
+	}
+
+	if lastMetric.ID > 0 {
+		s.total += total
+		s.totalLastId = lastMetric.ID
+	}
+
+	return s.total, nil
+}
+
 func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 	_, err := s.currentUser(r)
 	if err != nil {
@@ -318,7 +345,12 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 
 	var total int64
 	if watch == 0 {
-		if err := query.Group("timestamp").Count(&total).Error; err != nil {
+		if from+to == 0 {
+			total, err = s.getTotal()
+			if err != nil {
+				return nil, err
+			}
+		} else if err := query.Group("timestamp").Count(&total).Error; err != nil {
 			return nil, fmt.Errorf("count: %w", err)
 		}
 	}

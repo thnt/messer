@@ -23,7 +23,7 @@
     { key: 'TotalFlow', name: 'Total (NCM)' },
   ];
 
-  const pagesize = 15;
+  const pagesize = 20;
   let from, to;
   const getMetricPage = p => {
     paging.current = p;
@@ -63,7 +63,6 @@
     now = dayjs();
   }, 1000);
 
-
   getMetricPage(1);
 </script>
 
@@ -91,7 +90,9 @@
     <span
       >{deviceErrorCode < 0
         ? `Disconnected from PLC device. Please check PLC device`
-        : `No data received since ${dayjs.unix(latestTs).format("D/M/YYYY H:mm:ss")}. Please check network and remote PLC`}</span
+        : `No data received since ${dayjs
+            .unix(latestTs)
+            .format('D/M/YYYY H:mm:ss')}. Please check network and remote PLC`}</span
     >
   </div>
 {/if}

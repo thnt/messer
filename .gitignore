@@ -2,5 +2,6 @@
 /dist/
 /.vscode/
 .DS_Store
+Taskfile.yml
 
 /tmp
