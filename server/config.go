@@ -12,6 +12,10 @@ type cfg struct {
 
 	HTTPAddr string `config:"HTTP_ADDR"`
 
+	Cookie struct {
+		Name string
+	}
+
 	Database struct {
 		Addr     string
 		Username string
@@ -32,6 +36,8 @@ var conf = cfg{
 }
 
 func init() {
+	conf.Cookie.Name = "ssid"
+
 	configFile := ".env"
 	if f := os.Getenv("CONFIG_FILE"); f != "" {
 		configFile = f

@@ -434,7 +434,7 @@ func (s *server) responseJSON(w http.ResponseWriter, data interface{}, opts ...i
 	w.Header().Set("Content-Type", "application/json")
 	if d, ok := data.(*loginResponse); ok {
 		ck := http.Cookie{
-			Name:     "ssid",
+			Name:     conf.Cookie.Name,
 			Value:    d.ssid,
 			MaxAge:   86400,
 			HttpOnly: true,
@@ -443,7 +443,7 @@ func (s *server) responseJSON(w http.ResponseWriter, data interface{}, opts ...i
 		w.Header().Set("Set-Cookie", ck.String())
 	} else if d, ok := data.(*logoutResponse); ok {
 		ck := http.Cookie{
-			Name:     "ssid",
+			Name:     conf.Cookie.Name,
 			Value:    d.ssid,
 			MaxAge:   -1,
 			HttpOnly: true,
@@ -540,7 +540,7 @@ type logoutResponse struct {
 }
 
 func (s *server) apiLogout(r *http.Request) (interface{}, error) {
-	if c, err := r.Cookie("ssid"); err == nil && c.Value != "" {
+	if c, err := r.Cookie(conf.Cookie.Name); err == nil && c.Value != "" {
 		return &logoutResponse{
 			ssid: c.Value,
 		}, nil
@@ -551,7 +551,7 @@ func (s *server) apiLogout(r *http.Request) (interface{}, error) {
 
 func (s *server) currentUser(r *http.Request) (*User, error) {
 	var sid string
-	if c, err := r.Cookie("ssid"); err == nil {
+	if c, err := r.Cookie(conf.Cookie.Name); err == nil {
 		sid = c.Value
 	}
 	if sid == "" {
