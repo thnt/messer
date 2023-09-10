@@ -14,6 +14,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	mysqldriver "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -53,8 +54,13 @@ func New(wwwRoot http.FileSystem) (Server, error) {
 		"%v:%v@tcp(%v)/%v?charset=utf8mb4&parseTime=true",
 		conf.Database.Username, conf.Database.Password, conf.Database.Addr, conf.Database.DBName,
 	)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
+	log.Printf("connecting to database...")
+	level := logger.Silent
+	if conf.Env == "development" {
+		level = logger.Info
+	}
+	db, err := gorm.Open(mysql.Open(dsn)), &gorm.Config{
+		Logger: logger.Default.LogMode(level),
 	})
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
@@ -78,8 +84,6 @@ func New(wwwRoot http.FileSystem) (Server, error) {
 		SetOnConnectHandler(s.onMQTTConnected)
 	s.mqtt = mqtt.NewClient(opts)
 
-	go s.getTotal()
-
 	return s, nil
 }
 
@@ -99,7 +103,7 @@ func (s *server) onMQTTConnected(c mqtt.Client) {
 	c.Subscribe(conf.MQTT.Topic, 1, s.onMQTTMessage)
 }
 
-func (s *server) onMQTTMessage(c mqtt.Client, m mqtt.Message) {
+func (s *server) onMQTTMessage(c mqtt.Client, msg mqtt.Message) {
 	var payload struct {
 		D []struct {
 			Tag   string
@@ -107,8 +111,8 @@ func (s *server) onMQTTMessage(c mqtt.Client, m mqtt.Message) {
 		}
 		Ts string
 	}
-	if err := json.Unmarshal(m.Payload(), &payload); err != nil {
-		log.Printf("failed to decode payload: %v: %v", string(m.Payload()), err)
+	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
+		log.Printf("failed to decode payload: %v: %v", string(msg.Payload()), err)
 		return
 	}
 
@@ -132,16 +136,14 @@ func (s *server) onMQTTMessage(c mqtt.Client, m mqtt.Message) {
 			continue
 		}
 
-		tag := strings.SplitN(d.Tag, ":", 2)
 		m := &Metric{
+			Src:       msg.Topic(),
 			Value:     d.Value,
 			Timestamp: ts,
+			Name:      d.Tag,
 		}
-		if len(tag) == 2 {
-			m.Src = tag[0]
-			m.Name = tag[1]
-		} else {
-			m.Name = tag[0]
+		if conf.MQTT.MetricSrc != "" {
+			m.Src = conf.MQTT.MetricSrc
 		}
 
 		metrics = append(metrics, m)
@@ -172,6 +174,7 @@ func (s *server) Start() error {
 		}
 		return fmt.Errorf("failed to connect to MQTT server: %v", err)
 	}
+	log.Printf("connected to MQTT server")
 
 	go func() {
 		for {
@@ -255,12 +258,20 @@ func (s *server) serveHTTP(w http.ResponseWriter, r *http.Request) {
 	staticHandler.ServeHTTP(w, r)
 }
 
-func (s *server) getTotal() (int64, error) {
+func (s *server) getTotal(src string) (int64, error) {
 	query := s.db.Model(&Metric{})
 	var total int64
 
+	if src != "" {
+		query = query.Where("src = ?", src)
+	}
+
 	var lastMetric Metric
-	if err := s.db.Order("id desc").First(&lastMetric).Error; err != nil {
+	var conds []any
+	if src != "" {
+		conds = append(conds, "src = ?", src)
+	}
+	if err := s.db.Order("id desc").First(&lastMetric, conds...).Error; err != nil {
 		return 0, fmt.Errorf("get last metric: %v", err)
 	}
 
@@ -288,6 +299,10 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 
 	q := r.URL.Query()
 
+	var src string
+	if v := q.Get("src"); v != "" {
+		src = v
+	}
 	var from, to int64
 	if v := q.Get("from"); v != "" {
 		if vv, err := strconv.Atoi(v); err == nil && vv > 0 {
@@ -328,6 +343,12 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 	query := s.db.Model(&Metric{})
 
 	var wheres []string
+	var args []any
+	if src != "" {
+		query = query.Where("src = ?", src)
+		wheres = append(wheres, "src = ?")
+		args = append(args, src)
+	}
 	if from > 0 {
 		query = query.Where("timestamp >= ?", from)
 		wheres = append(wheres, fmt.Sprintf("timestamp >= %v", from))
@@ -346,7 +367,7 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 	var total int64
 	if watch == 0 {
 		if from+to == 0 {
-			total, err = s.getTotal()
+			total, err = s.getTotal(src)
 			if err != nil {
 				return nil, err
 			}
@@ -355,16 +376,7 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 		}
 	}
 
-	results := []struct {
-		Pressure       *float64
-		Temperature    *float64
-		Massflow       *float64
-		TTflowG1000    *float64
-		TTflowL1000    *float64
-		TotalFlow      *float64
-		DeviceErrorPLC *int
-		Timestamp      int64
-	}{}
+	results := []map[string]any{}
 
 	var ch chan bool
 	if watch > 0 {
@@ -377,29 +389,42 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 	}
 
 	res := map[string]interface{}{
-		"total": total,
+		"total":   total,
+		"metrics": &results,
 	}
 
 	const MAX_METRICS_PER_TIMESTAMP = 20
 
+	var names []string
+	{
+		q := s.db.Model(&Metric{}).Distinct("name")
+		if src != "" {
+			q = q.Where("src = ?", src)
+		}
+		if err := q.Scan(&names).Error; err != nil {
+			return nil, fmt.Errorf("get metrics name: %v", err)
+		}
+	}
+	if len(names) == 0 {
+		return res, nil
+	}
+
+	var mcols []string
+	for _, n := range names {
+		mcols = append(mcols, fmt.Sprintf(`MAX(CASE WHEN name = '%v' THEN value END) '%v'`, n, n))
+	}
+
 	for {
 		sql := fmt.Sprintf(`
-		SELECT timestamp,
-			MAX(CASE WHEN name = 'Pressure' THEN value END) Pressure,
-			MAX(CASE WHEN name = 'Temperature' THEN value END) Temperature,
-			MAX(CASE WHEN name = 'Massflow' THEN value END) Massflow,
-			MAX(CASE WHEN name = 'TTflowG1000' THEN value END) TTflowG1000,
-			MAX(CASE WHEN name = 'TTflowL1000' THEN value END) TTflowL1000,
-			MAX(CASE WHEN name = 'TotalFlow' THEN value END) TotalFlow,
-			MAX(CASE WHEN name = '#DEVICE_ERROR_PLC' THEN value END) DeviceErrorPLC
+		SELECT timestamp as Timestamp, %v
 		FROM (
 			SELECT MAX(id) id FROM metrics %v GROUP BY name, timestamp ORDER BY id DESC LIMIT %v
 		) t LEFT JOIN metrics ON t.id = metrics.id
 		GROUP BY timestamp
 		ORDER BY timestamp DESC
 		LIMIT %v, %v
-	`, where, (limit+skip)*MAX_METRICS_PER_TIMESTAMP, skip, limit)
-		query = s.db.Raw(sql)
+	`, strings.Join(mcols, ","), where, (limit+skip)*MAX_METRICS_PER_TIMESTAMP, skip, limit)
+		query = s.db.Raw(sql, args...)
 		if err := query.Scan(&results).Error; err != nil {
 			return nil, fmt.Errorf("query: %w", err)
 		}
@@ -411,8 +436,6 @@ func (s *server) apiGetMetrics(r *http.Request) (interface{}, error) {
 			break
 		}
 	}
-
-	res["metrics"] = results
 
 	return res, nil
 }

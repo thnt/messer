@@ -9,8 +9,8 @@ import (
 
 type cfg struct {
 	ConfigFile string
-
-	HTTPAddr string `config:"HTTP_ADDR"`
+	Env        string `config:"APP_ENV"`
+	HTTPAddr   string `config:"HTTP_ADDR"`
 
 	Cookie struct {
 		Name string
@@ -24,10 +24,11 @@ type cfg struct {
 	} `config:"DB"`
 
 	MQTT struct {
-		Addr     string
-		Username string
-		Password string
-		Topic    string
+		Addr      string
+		Username  string
+		Password  string
+		Topic     string
+		MetricSrc string `config:"METRIC_SRC"`
 	}
 }
 

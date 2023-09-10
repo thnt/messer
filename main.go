@@ -65,10 +65,11 @@ func main() {
 
 	errs := make(chan error, 2)
 	go func() {
+		log.Printf("starting server...")
 		errs <- srv.Start()
 	}()
 	go func() {
-		c := make(chan os.Signal)
+		c := make(chan os.Signal, 3)
 		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 		<-c
 		errs <- srv.Stop()

@@ -1,6 +1,7 @@
-/node_modules/
-/dist/
-/.vscode/
+node_modules
+dist
+.vscode
+.task
 .DS_Store
 Taskfile.yml
 

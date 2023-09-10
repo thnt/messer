@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { writable, get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 const _userStore = writable({
   init: false,
@@ -7,6 +7,7 @@ const _userStore = writable({
   loading: false,
   error: null,
 });
+
 export const userStore = {
   subscribe: _userStore.subscribe,
   auth: async () => {
@@ -40,7 +41,9 @@ const _metricStore = writable({
   recents: [],
   loading: false,
   error: null,
+  dashboard: {},
 });
+
 export const metricStore = {
   subscribe: _metricStore.subscribe,
   getMetrics: async params => {
@@ -61,7 +64,7 @@ export const metricStore = {
   getRecents: async limit => {
     try {
       const { recents } = get(_metricStore);
-      const params = { limit, watch: 30, from: dayjs().unix() - 86400 };
+      const params = { limit, watch: 30, from: dayjs().unix() - 86400, src };
       if (recents.length) {
         params.from = recents[0].Timestamp + 1;
       }
@@ -80,6 +83,31 @@ export const metricStore = {
       console.log(error);
       setTimeout(() => {
         metricStore.getRecents(limit);
+      }, 5000);
+    }
+  },
+  getDashboard: async (src = '') => {
+    try {
+      const { dashboard } = get(_metricStore);
+      const params = { limit: 1, src, watch: 30, from: dayjs().unix() - 86400 };
+      if (dashboard?.Timestamp) {
+        params.from = dashboard.Timestamp + 1;
+      }
+      const res = await api.GET('/metrics', params);
+      if (res.metrics?.length) {
+        _metricStore.update(s => ({
+          ...s,
+          dashboard: res.metrics[0],
+        }));
+      }
+
+      setTimeout(() => {
+        metricStore.getDashboard(src);
+      }, 1000);
+    } catch (error) {
+      console.log(error);
+      setTimeout(() => {
+        metricStore.getDashboard(src);
       }, 5000);
     }
   },
