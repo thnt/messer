@@ -14,7 +14,6 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	mysqldriver "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -59,7 +58,7 @@ func New(wwwRoot http.FileSystem) (Server, error) {
 	if conf.Env == "development" {
 		level = logger.Info
 	}
-	db, err := gorm.Open(mysql.Open(dsn)), &gorm.Config{
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(level),
 	})
 	if err != nil {
